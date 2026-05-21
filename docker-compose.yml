@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: ./public
+      dockerfile: Dockerfile
+    container_name: astro-tech-web
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - data_volume:/data
+    environment:
+      - NGINX_HOST=dolores.danielhpp.duckdns.org
+      - NGINX_PORT=80
+    depends_on:
+      worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /usr/share/nginx/html/index.html"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  worker:
+    build:
+      context: ./public
+      dockerfile: Dockerfile.worker
+    container_name: astro-tech-worker
+    restart: unless-stopped
+    volumes:
+      - data_volume:/data
+    environment:
+      - DATA_DIR=/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import os, sys; sys.exit(0 if os.path.getsize(\"/data/rates.json\") > 0 else 1)'"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  data_volume:

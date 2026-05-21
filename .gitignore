@@ -1,0 +1,24 @@
+# Exclude virtual environments
+public/venv/
+
+# Exclude python cache
+public/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude IDE and system files
+.DS_Store
+.vscode/
+.idea/
+.vite/
+awesome-design-md/
+
+# Exclude generated local data
+public/data/*.json
+public/data/*.js
+!public/data/rates.json
+!public/data/history.json
+!public/data/rates.js
+!public/data/history.js

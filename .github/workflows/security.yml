@@ -1,0 +1,43 @@
+name: Security Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  docker-and-lint:
+    name: Build and Lint Dockerfiles
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build web container
+        run: docker build -f public/Dockerfile -t astro-tech-web:test public
+
+      - name: Build worker container
+        run: docker build -f public/Dockerfile.worker -t astro-tech-worker:test public
+
+      - name: Lint Dockerfiles with Hadolint
+        run: |
+          docker run --rm -i hadolint/hadolint < public/Dockerfile
+          docker run --rm -i hadolint/hadolint < public/Dockerfile.worker
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r public/requirements.txt
+
+      - name: Validate Python syntax
+        run: python -m py_compile public/worker.py

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro-Tech Calculator | Tasa al Día Venezuela</title>
+    <meta name="description"
+        content="Calculadora de divisas en tiempo real para Venezuela. Tasa Oficial y Paralelo con gráficos históricos.">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dolores.danielhpp.duckdns.org/">
+    <meta property="og:title" content="Astro-Tech Calculator | Tasa al Día">
+    <meta property="og:description"
+        content="Calculadora de divisas en tiempo real para Venezuela. Tasa Oficial y Paralelo con gráficos históricos.">
+    <meta property="og:image" content="https://dolores.danielhpp.duckdns.org/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://dolores.danielhpp.duckdns.org/">
+    <meta property="twitter:title" content="Astro-Tech Calculator | Tasa al Día">
+    <meta property="twitter:description"
+        content="Calculadora de divisas en tiempo real para Venezuela. Tasa Oficial y Paralelo con gráficos históricos.">
+    <meta property="twitter:image" content="https://dolores.danielhpp.duckdns.org/og-image.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- External Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40">
+                    <defs>
+                        <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M 50 10 L 10 90 L 30 90 L 40 70 L 60 70 L 70 90 L 90 90 L 50 10 Z M 50 30 L 58 60 L 42 60 Z"
+                        fill="url(#brandGradient)" stroke="none" />
+                    <circle cx="50" cy="45" r="5" fill="#ffffff" opacity="0.8" />
+                </svg>
+                <h1>Astro-Tech Calculator</h1>
+            </div>
+            <div class="header-controls">
+                <select id="theme-selector" class="theme-select" aria-label="Seleccionar tema">
+                    <option value="binance">Binance (Oscuro)</option>
+                    <option value="linear">Linear (Charcoal)</option>
+                    <option value="supabase">Supabase (Esmeralda)</option>
+                    <option value="vercel">Vercel (Stark Claro)</option>
+                    <option value="apple">Apple (Luz)</option>
+                </select>
+            </div>
+        </header>
+
+        <main>
+            <div class="calculator-column">
+                <!-- Mode Selector -->
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="convert">Convertir</button>
+                    <button class="mode-btn" data-mode="calculate">Calcular Tasa</button>
+                </div>
+
+                <!-- Converter Section -->
+                <section id="converter-section" class="active-section">
+                    <div class="card">
+                        <div class="currency-toggle-container">
+                            <span class="label">Moneda Base:</span>
+                            <div class="toggle-switch">
+                                <input type="radio" id="currency-usd" name="base-currency" value="USD" checked>
+                                <label for="currency-usd">USD ($)</label>
+                                <input type="radio" id="currency-eur" name="base-currency" value="EUR">
+                                <label for="currency-eur">EUR (€)</label>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="amount-foreign">Monto en Divisa</label>
+                            <div class="input-wrapper">
+                                <span class="currency-symbol">$</span>
+                                <input type="number" id="amount-foreign" placeholder="0.00" value="1">
+                            </div>
+                        </div>
+
+                        <div class="divider">
+                            <button id="swap-currencies" aria-label="Invertir conversión">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <polyline points="19 12 12 19 5 12"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="results-container">
+                            <div class="result-card official">
+                                <div class="result-header">
+                                    <span class="rate-name">BCV (Oficial)</span>
+                                    <span class="rate-value" id="rate-official">--.--</span>
+                                </div>
+                                <div class="result-amount">
+                                    <span id="result-official">0.00</span> <span class="currency-code">Bs</span>
+                                </div>
+                                <button class="copy-btn" data-target="result-official">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+
+                            <div class="result-card parallel">
+                                <div class="result-header">
+                                    <span class="rate-name">Paralelo</span>
+                                    <span class="rate-value" id="rate-parallel">--.--</span>
+                                </div>
+                                <div class="result-amount">
+                                    <span id="result-parallel">0.00</span> <span class="currency-code">Bs</span>
+                                </div>
+                                <button class="copy-btn" data-target="result-parallel">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="result-card usdt">
+                                <div class="result-header">
+                                    <span class="rate-name">USDT (Binance)</span>
+                                    <span class="rate-value" id="rate-usdt">--.--</span>
+                                </div>
+                                <div class="result-amount">
+                                    <span id="result-usdt">0.00</span> <span class="currency-code">Bs</span>
+                                </div>
+                                <button class="copy-btn" data-target="result-usdt">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="last-updated">
+                            Actualizado: <span id="last-update-time">--:--</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Calculator Section (Implied Rate) -->
+                <section id="calculator-section">
+                    <div class="card">
+                        <h3>Calculadora de Tasa Implícita</h3>
+                        <p class="subtitle">Calcula la tasa de cambio basada en un monto en divisa y su equivalente en
+                            Bolívares.</p>
+
+                        <div class="input-group">
+                            <label for="calc-foreign">Monto en Divisa ($/€)</label>
+                            <input type="number" id="calc-foreign" placeholder="Ej: 100">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="calc-ves">Monto en Bolívares (Bs)</label>
+                            <input type="number" id="calc-ves" placeholder="Ej: 3500">
+                        </div>
+
+                        <div class="result-card implied">
+                            <div class="result-header">
+                                <span class="rate-name">Tasa Implícita</span>
+                            </div>
+                            <div class="result-amount">
+                                <span id="result-implied">0.00</span> <span class="currency-code">Bs/Divisa</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section chart-column">
+                <div class="card">
+                    <h3>Histórico de Tasas</h3>
+                    <div class="chart-container">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+    </main>
+
+    <footer>
+        <p>| Made with love by <strong>Astro-Tech</strong> |
+        </p>
+    </footer>
+    </div>
+
+    <!-- External Scripts -->
+    <script src="script.js"></script>
+</body>
+
+</html>

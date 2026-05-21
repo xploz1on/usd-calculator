@@ -1,0 +1,21 @@
+# Exclude local virtual environment and caches
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude system files
+.DS_Store
+Thumbs.db
+
+# Exclude generated local data
+data/
+
+# Exclude git
+.git/
+.gitignore
+
+# Exclude IDE folders
+.vscode/
+.idea/

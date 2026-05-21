@@ -1,0 +1,26 @@
+# Ignore local Python virtual environment and caches
+public/venv/
+public/__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore editor and system files
+.DS_Store
+.vscode/
+.idea/
+
+# Ignore generated local data
+public/data/
+
+# Ignore build artifacts
+node_modules/
+.npm/
+
+# Ignore Git metadata
+.git/
+.gitignore
+
+# Ignore Docker artifacts
+docker-compose.override.yml
