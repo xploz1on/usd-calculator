@@ -1,5 +1,5 @@
 # Use a pinned lightweight Nginx Alpine image
-FROM nginx:1.25.0-alpine
+FROM nginx:1.31.1-alpine
 
 # Copy the static website files to the Nginx html directory
 COPY . /usr/share/nginx/html
